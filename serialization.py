@@ -9,6 +9,7 @@ class test_class(object):
 
 class test_subject(object):
     def __init__(self, id, name, email, phone):
+        self.id = id
         self.name = name
         self.email = email
         self.phone = phone
@@ -17,26 +18,60 @@ class test_subject(object):
 # ------
 def create_data():
     # read from init_info.txt
-    import sys
 
+    read_info = open("init_info.txt", r)
+
+    do_teacher = True
+    do_name = True
+    do_email = False
+    do_phone = False
+
+    name = ""
+    email = ""
+    phones = {}
     students = []
     id = 0
 
-    class_name = sys.stdin.readline()
+    class_name = read_info.readline()
 
-    name, email, phone = sys.stdin.readline().split()
-    teacher = test_subject(name, email, phone)
-
-    for line in sys.stdin.readlines():
+    for line in read_info.readlines():
         try:
-            name, email, phone = line.split()
+            if do_name:
+                name = line
+                do_name = False
+                do_email = True
+                continue
 
-            id += 1
-            student = test_subject(id, name, email, phone)
-            students.append(student)
+            if do_email:
+                email = line
+                do_email = False
+                do_phone = True
+
+            if do_phone:
+                if line == '--':
+                    id += 1
+
+                    if do_teacher:
+                        teacher = test_subject(id, name, email, phones)
+                        do_teacher = False
+                    else:
+                        subject = test_subject(id, name, email, phone)
+                        students.append(subject)
+
+                    phones = {}
+                    subject = None
+                    do_phone = False
+                    do_name = True
+
+                else:
+                    phone_id, number = line.split()
+                    phones[phone_id] = number
+
 
         except:
             continue
+
+    read_info.close()
 
     # create class with info read from file
     my_class = test_class(class_name, teacher, students)
