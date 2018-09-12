@@ -1,0 +1,18 @@
+Class name
+Teacher name
+Teacher e-mail
+Teacher phone1
+Teacher phone2
+Teacher phone3
+--
+Student1 name
+Student1 e-mail
+Student1 phone1
+Student1 phone2
+--
+Student2 name
+Student2 e-mail
+Student2 phone1
+Student2 phone2
+Student2 phone3
+Student2 phone4
