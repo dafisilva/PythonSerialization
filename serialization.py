@@ -82,8 +82,10 @@ def measures(filename):
 if __name__ == '__main__':
     my_class = create_data()
 
-    @measures("serialize_to_json.txt")
+    time_id = str(time.strftime("%d_%m_%Y_%H%M%S", time.gmtime()))
+
+    @measures(time_id + "_serialize_to_json.txt")
     to_json(my_class)
 
-    @measures("deserialize_from_json.txt")
+    @measures(time_id + "_deserialize_from_json.txt")
     from_json()
