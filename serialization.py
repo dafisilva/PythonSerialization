@@ -1,4 +1,4 @@
-import msgpack, json, functools, time
+import msgpack, json, functools, time, statistics, sys, os
 
 
 # create time id
@@ -27,16 +27,47 @@ def measures(filename):
         @functools.wraps(func)
 
         def f_to_run_func(*args, **kwargs):
-            #start measures
-            begin_time = time.time()
-            func(*args, **kwargs)
-            #end measures
-            end_time = time.time()
+            message = ""
+            n_loops = 30
+            time_sample = []
+            size_sample = []
 
-            elapsed_time = end_time - begin_time
-            message = "Time of operation " + str(elapsed_time)
+            for i in range(n_loops):
+                #start measures
+                begin_time = time.time()
+                objfile = func(*args, **kwargs)
+                #end measures
+                end_time = time.time()
 
-            #write measures to file = "filename"
+                # iteration statistics
+                elapsed_time = end_time - begin_time
+                time_sample.append(elapsed_time)
+
+                if isinstance(objfile, dict):
+                    # we are returned a dict from the json or msgpack so, we need to populate the test_class object before verifying it's size
+                    my_class = test_class(None, None, None)
+                    my_class.__dict__ = objfile
+                    object_size = sys.getsizeof(my_class)
+                else:
+                    object_size = os.path.getsize(objfile)
+                size_sample.append(object_size)
+
+                loop_result = "Loop (" + str(i + 1) + ") - Time: " + str(elapsed_time) + " (s)\t\t - size of file/object created: " + str(object_size) + "(Bytes)\n"
+                message += loop_result
+
+            # final statistics
+            time_stdev = statistics.stdev(time_sample)
+            time_mean = statistics.mean(time_sample)
+            size_stdev = statistics.stdev(size_sample)
+            size_mean = statistics.mean(size_sample)
+
+            message += "\nFinal statics:\n"
+            message += "\tAverage time of operation: " + str(time_mean) + " (s)\n"
+            message += "\tStandard deviation concerning operation time: " + str(time_stdev) + " (s)\n"
+            message += "\tAverage size of file created: " + str(size_mean) + " (bytes)\n"
+            message += "\tStandard deviation of the size of the file created: " + str(size_stdev) + " (bytes)\n"
+
+            # write measures to file = "filename"
             with open(filename, "w") as winfo:
                 winfo.write(message)
 
@@ -113,12 +144,17 @@ def to_json(my_class):
     with open("data.json", "w") as wf:
         json.dump(my_class.__dict__, wf, default=lambda o: o.__dict__)
 
+    return "data.json"
 
-# deserialiaze from json
+
+# deserialiase from json
 @measures(time_id + "_deserialize_from_json.txt")
 def from_json():
+    data = None
     with open("data.json", "r") as rf:
         data = json.load(rf)
+
+    return data
 
 
 # serialise to msgpack
@@ -127,12 +163,18 @@ def to_msgpack(my_class):
     with open("data.msgpack", "wb") as wf:
         msgpack.pack(my_class.__dict__, wf,  default=lambda o: o.__dict__)
 
+    return "data.msgpack"
 
-# deserialiaze from msgpack
+
+# deserialiase from msgpack
 @measures(time_id + "_deserialize_from_msgpack.txt")
 def from_msgpack():
+    data = None
     with open("data.msgpack", "rb") as rf:
         data = msgpack.unpack(rf)
+
+    return data
+
 
 
 if __name__ == '__main__':
