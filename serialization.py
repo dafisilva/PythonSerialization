@@ -39,20 +39,21 @@ def measures(filename):
             with open(filename, "w") as winfo:
                 winfo.write(message)
 
-            return f_to_run_func
-        return a_decorator
+        return f_to_run_func
+    return a_decorator
 
 
 def create_data():
     # read from init_info.txt
 
-    read_info = open("init_info.txt", r)
+    read_info = open("init_info.txt", 'r')
 
     do_teacher = True
     do_name = True
     do_email = False
     do_phone = False
 
+    teacher = None
     name = ""
     email = ""
     phones = {}
