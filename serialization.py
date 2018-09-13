@@ -64,7 +64,7 @@ def create_data():
     class_name = read_info.readline()
 
     for line in read_info.readlines():
-        
+
         if do_name:
             name = line
             do_name = False
@@ -111,7 +111,7 @@ def create_data():
 @measures(time_id + "_serialize_to_json.txt")
 def to_json(my_class):
     with open("data.json", "w") as wf:
-        json.dump(my_class.__dict__, wf)
+        json.dump(my_class.__dict__, wf, default=lambda o: o.__dict__)
 
 
 # deserialiaze from json
@@ -125,7 +125,7 @@ def from_json():
 @measures(time_id + "_serialize_to_msgpack.txt")
 def to_msgpack(my_class):
     with open("data.msgpack", "wb") as wf:
-        msgpack.pack(my_class.__dict__, wf)
+        msgpack.pack(my_class.__dict__, wf,  default=lambda o: o.__dict__)
 
 
 # deserialiaze from msgpack
