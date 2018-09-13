@@ -1,7 +1,8 @@
 import json, functools, time
 
 
-time_id = ""
+# create time id
+time_id = str(time.strftime("%d_%m_%Y_%H%M%S", time.gmtime()))
 
 
 class test_class(object):
@@ -33,7 +34,7 @@ def measures(filename):
             end_time = time.time()
 
             elapsed_time = end_time - begin_time
-            message = "Time of operation " + elapsed_time
+            message = "Time of operation " + str(elapsed_time)
 
             #write measures to file = "filename"
             with open(filename, "w") as winfo:
@@ -111,7 +112,7 @@ def create_data():
 @measures(time_id + "_serialize_to_json.txt")
 def to_json(my_class):
     with open("data.json", "w") as wf:
-        json.dump(my_class, wf)
+        json.dump(my_class.__dict__, wf)
 
 
 # deserialiaze from json
@@ -123,8 +124,6 @@ def from_json():
 
 if __name__ == '__main__':
     my_class = create_data()
-
-    time_id = str(time.strftime("%d_%m_%Y_%H%M%S", time.gmtime()))
 
     to_json(my_class)
 
