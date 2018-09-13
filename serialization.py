@@ -1,6 +1,9 @@
 import json, functools, time
 
 
+time_id = ""
+
+
 class test_class(object):
     def __init__(self, name, teacher, students):
         self.name = name
@@ -16,6 +19,30 @@ class test_subject(object):
 
 
 # ------
+# decorator for statistics
+def measures(filename):
+
+    def a_decorator(func):
+        @functools.wraps(func)
+
+        def f_to_run_func(*args, **kwargs):
+            #start measures
+            begin_time = time.time()
+            func(*args, **kwargs)
+            #end measures
+            end_time = time.time()
+
+            elapsed_time = end_time - begin_time
+            message = "Time of operation " + elapsed_time
+
+            #write measures to file = "filename"
+            with open(filename, "w") as winfo:
+                winfo.write(message)
+
+            return f_to_run_func
+        return a_decorator
+
+
 def create_data():
     # read from init_info.txt
 
@@ -80,38 +107,17 @@ def create_data():
 
 
 # serialise to json
+@measures(time_id + "_serialize_to_json.txt")
 def to_json(my_class):
     with open("data.json", "w") as wf:
         json.dump(my_class, wf)
 
 
 # deserialiaze from json
+@measures(time_id + "_deserialize_from_json.txt")
 def from_json():
     with open("data.json", "r") as rf:
         data = json.load(rf)
-
-
-# decorator for statistics
-def measures(filename):
-
-    def a_decorator(func):
-        @functools.wraps(func)
-
-        def f_to_run_func(*args, **kwargs):
-            #start measures
-            begin_time = time.time()
-            func(*args, **kwargs)
-            #end measures
-            end_time = time.time()
-
-            elapsed_time = end_time - begin_time
-            message = "Time of operation " + elapsed_time
-
-            #write measures to file = "filename"
-            with open(filename, "w") as winfo:
-                winfo.write(message)
-
-    return f_to_run_func
 
 
 if __name__ == '__main__':
@@ -119,8 +125,6 @@ if __name__ == '__main__':
 
     time_id = str(time.strftime("%d_%m_%Y_%H%M%S", time.gmtime()))
 
-    @measures(time_id + "_serialize_to_json.txt")
     to_json(my_class)
 
-    @measures(time_id + "_deserialize_from_json.txt")
     from_json()
