@@ -1,4 +1,4 @@
-import json, functools, time
+import msgpack, json, functools, time
 
 
 # create time id
@@ -64,41 +64,40 @@ def create_data():
     class_name = read_info.readline()
 
     for line in read_info.readlines():
-        try:
-            if do_name:
-                name = line
-                do_name = False
-                do_email = True
+        
+        if do_name:
+            name = line
+            do_name = False
+            do_email = True
+            continue
+
+        if do_email:
+            email = line
+            do_email = False
+            do_phone = True
+            continue
+
+        if do_phone:
+            if line == '--\n':
+                id += 1
+
+                if do_teacher:
+                    teacher = test_subject(id, name, email, phones)
+                    do_teacher = False
+                else:
+                    subject = test_subject(id, name, email, phones)
+                    students.append(subject)
+                    subject = None
+
+                phones = {}
+                do_phone = False
+                do_name = True
                 continue
 
-            if do_email:
-                email = line
-                do_email = False
-                do_phone = True
-
-            if do_phone:
-                if line == '--':
-                    id += 1
-
-                    if do_teacher:
-                        teacher = test_subject(id, name, email, phones)
-                        do_teacher = False
-                    else:
-                        subject = test_subject(id, name, email, phone)
-                        students.append(subject)
-
-                    phones = {}
-                    subject = None
-                    do_phone = False
-                    do_name = True
-
-                else:
-                    phone_id, number = line.split()
-                    phones[phone_id] = number
-
-
-        except:
-            continue
+            else:
+                phone_id, number = line.split()
+                phones[phone_id] = number
+                continue
 
     read_info.close()
 
@@ -122,9 +121,27 @@ def from_json():
         data = json.load(rf)
 
 
+# serialise to msgpack
+@measures(time_id + "_serialize_to_msgpack.txt")
+def to_msgpack(my_class):
+    with open("data.msgpack", "wb") as wf:
+        msgpack.pack(my_class.__dict__, wf)
+
+
+# deserialiaze from msgpack
+@measures(time_id + "_deserialize_from_msgpack.txt")
+def from_msgpack():
+    with open("data.msgpack", "rb") as rf:
+        data = msgpack.unpack(rf)
+
+
 if __name__ == '__main__':
     my_class = create_data()
 
     to_json(my_class)
 
     from_json()
+
+    to_msgpack(my_class)
+
+    from_msgpack()
