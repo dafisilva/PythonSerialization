@@ -135,6 +135,12 @@ def create_data():
     # create class with info read from file
     my_class = test_class(class_name, teacher, students)
 
+    message = "Elements in class: " + str(id)
+    message += "\nSize of class: " + str(sys.getsizeof(my_class)) + " (Bytes)"
+
+    with open(time_id + "_init_status.txt", "w") as wf:
+        wf.write(message)
+
     return my_class
 
 
